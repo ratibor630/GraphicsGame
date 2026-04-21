@@ -20,12 +20,12 @@ int main(int argc, char* argv[]) {
 	window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, RESOLUTION_WIDTH, RESOLUTION_HEIGHT, 0);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	const int FPS = 60;
+	int debug = 0;
 
 	bool running = true;
-	const int ANIMATION_SPEED = 32;
-	// че за animation speed нахуй?
 
 	SDL_Event event;
+	const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 
 	//Инициализация необходимых переменных для главного персонажа
 	const int PLAYER_WALKING_SPRITE_COUNT = 29;
@@ -47,11 +47,6 @@ int main(int argc, char* argv[]) {
 	{
 		Uint32 framePreparing = SDL_GetTicks();
 		Uint32 currentTicks = SDL_GetTicks();
-		///////////////////////
-		//Движок анимации
-		///////////////////////
-
-
 
 
 
@@ -68,11 +63,15 @@ int main(int argc, char* argv[]) {
 				switch (event.button.button)
 				{
 				case SDL_BUTTON_LEFT: {
-					cout << "left button pressed" << endl;
+					if (debug > 0) {
+						cout << "left button pressed" << endl;
+					}
 					break;
 				}
 				case SDL_BUTTON_RIGHT: {
-					cout << "right button pressed" << endl;
+					if (debug > 0) {
+						cout << "right button pressed" << endl;
+					}
 					break;
 				}
 				default:
@@ -84,11 +83,15 @@ int main(int argc, char* argv[]) {
 				switch (event.button.button)
 				{
 				case SDL_BUTTON_LEFT: {
-					cout << "left button released" << endl;
+					if (debug > 0) {
+						cout << "left button released" << endl;
+					}
 					break;
 				}
 				case SDL_BUTTON_RIGHT: {
-					cout << "right button released" << endl;
+					if (debug > 0) {
+						cout << "right button released" << endl;
+					}
 					break;
 				}
 				default:
@@ -97,74 +100,62 @@ int main(int argc, char* argv[]) {
 				break;
 			}
 			case SDL_MOUSEMOTION: {
-				cout << "Mouse position: " << event.motion.x << ", " << event.motion.y << endl;
+				if (debug > 0) {
+					cout << "Mouse position: " << event.motion.x << ", " << event.motion.y << endl;
+				}
 				break;
 			}
 			case SDL_KEYDOWN: {
-				switch (event.key.keysym.scancode)
-				{
-				case SDL_SCANCODE_W: {
-					cout << "W pressed" << endl;
-					playerWalkingSrc.y = 400;
-					playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
-					playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
-					break;
-
-				}
-				case SDL_SCANCODE_A: {
-					cout << "A pressed" << endl;
-					playerWalkingSrc.y = 800;
-					playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
-					playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
-					break;
-				}
-				case SDL_SCANCODE_S: {
-					cout << "S pressed" << endl;
-					playerWalkingSrc.y = 0;
-					playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
-					playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
-					break;
-				}
-				case SDL_SCANCODE_D: {
-					cout << "D pressed" << endl;
-					playerWalkingSrc.y = 1200;
-					playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
-					playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
+				switch (event.key.keysym.scancode) {
+				case SDL_SCANCODE_F2: {
+					debug = (debug + 1) % 2;
 					break;
 				}
 				default:
 					break;
 				}
-				break;
-			}
-			case SDL_KEYUP: {
-				switch (event.key.keysym.scancode)
-				{
-				case SDL_SCANCODE_W: {
-					cout << "W released" << endl;
-					break;
-				}
-				case SDL_SCANCODE_A: {
-					cout << "A released" << endl;
-					break;
-				}
-				case SDL_SCANCODE_S: {
-					cout << "S released" << endl;
-					break;
-				}
-				case SDL_SCANCODE_D: {
-					cout << "D released" << endl;
-					break;
-				}
-				default:
-					break;
-				}
-			}
 			default:
 				break;
 			}
 			break;
+			}
 		}
+
+
+		//Движение игрока на WASD
+		if (keyboardState[SDL_SCANCODE_W]) {
+			if (debug > 0) {
+				cout << "W pressed" << endl;
+			}
+			playerWalkingSrc.y = 400;
+			playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
+			playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
+		}
+		if (keyboardState[SDL_SCANCODE_S]) {
+			if (debug > 0) {
+				cout << "S pressed" << endl;
+			}
+			playerWalkingSrc.y = 0;
+			playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
+			playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
+		}
+		if (keyboardState[SDL_SCANCODE_A]) {
+			if (debug > 0) {
+				cout << "A pressed" << endl;
+			}
+			playerWalkingSrc.y = 800;
+			playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
+			playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
+		}
+		if (keyboardState[SDL_SCANCODE_D]) {
+			if (debug > 0) {
+				cout << "D pressed" << endl;
+			}
+			playerWalkingSrc.y = 1200;
+			playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
+			playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
+		}
+
 
 		//Отрисовываем фон
 		SDL_SetRenderDrawColor(renderer, 225, 255, 255, 255);
@@ -190,7 +181,9 @@ int main(int argc, char* argv[]) {
 	return 1;
 }
 
-// TODO сделать подготовку следующего кадра заранее, хуй знает как 
+
+
+// TODO в идеале убрать окно дебага до вызова дебага
 // TODO завершать анимацию ходьбы и ждать следующей команды
-// TODO решить надо ли запоминать очередь команд
-// TODO при зажатии кнопки надо реализовать плавную анимацию
+// TODO сделать защиту от отрицательного SDL_Delay
+// TODO разделить логику и отрисовку кадров на 2 независимых потока чтобы игра не зависела от количества fps
