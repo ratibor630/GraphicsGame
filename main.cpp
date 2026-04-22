@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <iostream>
+#include <windows.h>
 
 using namespace std;
 
@@ -48,8 +49,15 @@ int main(int argc, char* argv[]) {
 		Uint32 framePreparing = SDL_GetTicks();
 		Uint32 currentTicks = SDL_GetTicks();
 
+		// дебаггер
+		if (debug) {
+			if (AllocConsole()) {
 
-
+				FILE* dummy;
+				_wfreopen_s(&dummy, L"CONOUT$", L"w", stdout);
+				_wfreopen_s(&dummy, L"CONOUT$", L"w", stderr);
+			}
+		}
 
 		while (SDL_PollEvent(&event))
 		{
@@ -123,38 +131,35 @@ int main(int argc, char* argv[]) {
 
 
 		//Движение игрока на WASD
-		if (keyboardState[SDL_SCANCODE_W]) {
-			if (debug > 0) {
-				cout << "W pressed" << endl;
+		if (keyboardState[SDL_SCANCODE_W] || keyboardState[SDL_SCANCODE_S] || keyboardState[SDL_SCANCODE_A] || keyboardState[SDL_SCANCODE_D]) {
+			if (keyboardState[SDL_SCANCODE_W]) {
+				if (debug > 0) {
+					cout << "W pressed" << endl;
+				}
+				playerWalkingSrc.y = 400;
 			}
-			playerWalkingSrc.y = 400;
+			if (keyboardState[SDL_SCANCODE_S]) {
+				if (debug > 0) {
+					cout << "S pressed" << endl;
+				}
+				playerWalkingSrc.y = 0;
+			}
+			if (keyboardState[SDL_SCANCODE_A]) {
+				if (debug > 0) {
+					cout << "A pressed" << endl;
+				}
+				playerWalkingSrc.y = 800;
+			}
+			if (keyboardState[SDL_SCANCODE_D]) {
+				if (debug > 0) {
+					cout << "D pressed" << endl;
+				}
+				playerWalkingSrc.y = 1200;
+			}
 			playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
 			playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
 		}
-		if (keyboardState[SDL_SCANCODE_S]) {
-			if (debug > 0) {
-				cout << "S pressed" << endl;
-			}
-			playerWalkingSrc.y = 0;
-			playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
-			playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
-		}
-		if (keyboardState[SDL_SCANCODE_A]) {
-			if (debug > 0) {
-				cout << "A pressed" << endl;
-			}
-			playerWalkingSrc.y = 800;
-			playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
-			playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
-		}
-		if (keyboardState[SDL_SCANCODE_D]) {
-			if (debug > 0) {
-				cout << "D pressed" << endl;
-			}
-			playerWalkingSrc.y = 1200;
-			playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
-			playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
-		}
+		
 
 
 		//Отрисовываем фон
@@ -187,3 +192,4 @@ int main(int argc, char* argv[]) {
 // TODO завершать анимацию ходьбы и ждать следующей команды
 // TODO сделать защиту от отрицательного SDL_Delay
 // TODO разделить логику и отрисовку кадров на 2 независимых потока чтобы игра не зависела от количества fps
+// TODO сделать чтобы последняя нажатая клавиша была направлением ходьбы
