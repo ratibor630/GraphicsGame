@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <iostream>
 #include <windows.h>
 
@@ -7,9 +8,10 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 
-	//Инициилизируем модули видео и картинок
+	//Инициилизируем модули видео, картинок и шрифтов
 	SDL_Init(SDL_INIT_VIDEO);
 	IMG_Init(IMG_INIT_PNG);
+	TTF_Init();
 
 	//Создаем окно и рендерер
 	SDL_Window* window = nullptr;
@@ -28,6 +30,12 @@ int main(int argc, char* argv[]) {
 	SDL_Event event;
 	const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 
+	//Инициализация переменных для хранения состояний клавиатуры
+	bool keyboardKeyPressedW;
+	bool keyboardKeyPressedS;
+	bool keyboardKeyPressedA;
+	bool keyboardKeyPressedD;
+
 	//Инициализация необходимых переменных для главного персонажа
 	const int PLAYER_WALKING_SPRITE_COUNT = 29;
 	int playerSpriteCountCurrent = 0;
@@ -36,9 +44,22 @@ int main(int argc, char* argv[]) {
 	SDL_Rect playerWalkingSrc = { 0, 0, 400, 400 };
 	SDL_Rect playerWalkingDest = { 0, 0, 400, 400 };
 
-	//Запускаем счетчик тиков
-	Uint32 lastUpdate = SDL_GetTicks();
-	// вот эту парашу уебать, сделать нормально
+	//Отрисовываем курсор
+	SDL_Surface* surfaceCursor = IMG_Load("resources/images/cursor.png");
+	SDL_Cursor* cursor = SDL_CreateColorCursor(surfaceCursor, 0, 0);
+	SDL_SetCursor(cursor);
+	SDL_FreeSurface(surfaceCursor);
+
+	// Создаем текстовое поле
+	TTF_Font* fontMontserrat_Black = TTF_OpenFont("resources/fonts/Montserrat/Montserrat-Black.ttf", 24);
+	SDL_Color fontColor = { 0,0,0,255 };
+	SDL_Surface* fontSurface = TTF_RenderText_Solid(fontMontserrat_Black, "Press F2 to debug", fontColor);
+
+	SDL_Texture* fontTex = SDL_CreateTextureFromSurface(renderer, fontSurface);
+	int fontW, fontH;
+	SDL_QueryTexture(fontTex, NULL, NULL, &fontW, &fontH);
+	SDL_Rect fontRect = { 550, 0, fontW, fontH };
+	
 
 
 	//////////////////////////////////////////
@@ -46,6 +67,7 @@ int main(int argc, char* argv[]) {
 	//////////////////////////////////////////
 	while (running)
 	{
+		// запускаем счетчик тиков
 		Uint32 framePreparing = SDL_GetTicks();
 		Uint32 currentTicks = SDL_GetTicks();
 
@@ -113,10 +135,77 @@ int main(int argc, char* argv[]) {
 				}
 				break;
 			}
+			//Обновляем статусы клавиатуры
 			case SDL_KEYDOWN: {
 				switch (event.key.keysym.scancode) {
 				case SDL_SCANCODE_F2: {
 					debug = (debug + 1) % 2;
+					break;
+				}
+				case SDL_SCANCODE_W: {
+					if (debug > 0) {
+						cout << "W pressed" << endl;
+					}
+					keyboardKeyPressedW = true;
+					playerLastDirection = 400;
+					break;
+				}
+				case SDL_SCANCODE_S: {
+					if (debug > 0) {
+						cout << "S pressed" << endl;
+					}
+					keyboardKeyPressedS = true;
+					playerLastDirection = 0;
+					break;
+				}
+				case SDL_SCANCODE_A: {
+					if (debug > 0) {
+						cout << "A pressed" << endl;
+					}
+					keyboardKeyPressedA = true;
+					playerLastDirection = 800;
+					break;
+				}
+				case SDL_SCANCODE_D: {
+					if (debug > 0) {
+						cout << "D pressed" << endl;
+					}
+					keyboardKeyPressedD = true;
+					playerLastDirection = 1200;
+					break;
+				}
+				default:
+					break;
+				}
+			}
+			case SDL_KEYUP: {
+				switch (event.key.keysym.scancode) {
+				case SDL_SCANCODE_W: {
+					if (debug > 0) {
+						cout << "W released" << endl;
+					}
+					keyboardKeyPressedW = false;
+					break;
+				}
+				case SDL_SCANCODE_S: {
+					if (debug > 0) {
+						cout << "S released" << endl;
+					}
+					keyboardKeyPressedS = false;
+					break;
+				}
+				case SDL_SCANCODE_A: {
+					if (debug > 0) {
+						cout << "A released" << endl;
+					}
+					keyboardKeyPressedA = false;
+					break;
+				}
+				case SDL_SCANCODE_D: {
+					if (debug > 0) {
+						cout << "D released" << endl;
+					}
+					keyboardKeyPressedD = false;
 					break;
 				}
 				default:
@@ -130,32 +219,12 @@ int main(int argc, char* argv[]) {
 		}
 
 
+		playerWalkingSrc.y = playerLastDirection;
+
+
 		//Движение игрока на WASD
 		if (keyboardState[SDL_SCANCODE_W] || keyboardState[SDL_SCANCODE_S] || keyboardState[SDL_SCANCODE_A] || keyboardState[SDL_SCANCODE_D]) {
-			if (keyboardState[SDL_SCANCODE_W]) {
-				if (debug > 0) {
-					cout << "W pressed" << endl;
-				}
-				playerWalkingSrc.y = 400;
-			}
-			if (keyboardState[SDL_SCANCODE_S]) {
-				if (debug > 0) {
-					cout << "S pressed" << endl;
-				}
-				playerWalkingSrc.y = 0;
-			}
-			if (keyboardState[SDL_SCANCODE_A]) {
-				if (debug > 0) {
-					cout << "A pressed" << endl;
-				}
-				playerWalkingSrc.y = 800;
-			}
-			if (keyboardState[SDL_SCANCODE_D]) {
-				if (debug > 0) {
-					cout << "D pressed" << endl;
-				}
-				playerWalkingSrc.y = 1200;
-			}
+			
 			playerSpriteCountCurrent = (playerSpriteCountCurrent + 1) % PLAYER_WALKING_SPRITE_COUNT;
 			playerWalkingSrc.x = playerWalkingSrc.w * playerSpriteCountCurrent;
 		}
@@ -171,6 +240,10 @@ int main(int argc, char* argv[]) {
 		//Отрисовываем персонажа
 		SDL_RenderCopy(renderer, playerWalkingTexture, &playerWalkingSrc, &playerWalkingDest);
 
+		//Отрисовываем текст
+		SDL_RenderCopy(renderer, fontTex, NULL, &fontRect);
+
+
 		SDL_RenderPresent(renderer);
 
 
@@ -185,8 +258,6 @@ int main(int argc, char* argv[]) {
 
 	return 1;
 }
-
-
 
 // TODO в идеале убрать окно дебага до вызова дебага
 // TODO завершать анимацию ходьбы и ждать следующей команды
