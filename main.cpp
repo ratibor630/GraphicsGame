@@ -31,16 +31,17 @@ int main(int argc, char* argv[]) {
 	const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 
 	//Инициализация переменных для хранения состояний клавиатуры
-	bool keyboardKeyPressedW;
-	bool keyboardKeyPressedS;
-	bool keyboardKeyPressedA;
-	bool keyboardKeyPressedD;
+	bool keyboardKeyPressedW = false;
+	bool keyboardKeyPressedS = false;
+	bool keyboardKeyPressedA = false;
+	bool keyboardKeyPressedD = false;
 
 	//Инициализация необходимых переменных для главного персонажа
-	const int PLAYER_WALKING_SPRITE_COUNT = 29;
+	const int PLAYER_WALKING_SPRITE_COUNT = 30;
 	int playerSpriteCountCurrent = 0;
 	int playerLastDirection = 0;
-	SDL_Texture* playerWalkingTexture = IMG_LoadTexture(renderer, "resources/images/player/walking_middle.png");
+	int playerDirectionKeysPressed = 0;
+	SDL_Texture* playerWalkingTexture = IMG_LoadTexture(renderer, "resources/images/player/walking.png");
 	SDL_Rect playerWalkingSrc = { 0, 0, 400, 400 };
 	SDL_Rect playerWalkingDest = { 0, 0, 400, 400 };
 
@@ -138,45 +139,134 @@ int main(int argc, char* argv[]) {
 			//Обновляем статусы клавиатуры
 			case SDL_KEYDOWN: {
 				switch (event.key.keysym.scancode) {
-				case SDL_SCANCODE_F2: {
-					debug = (debug + 1) % 2;
-					break;
-				}
-				case SDL_SCANCODE_W: {
-					if (debug > 0) {
-						cout << "W pressed" << endl;
+					case SDL_SCANCODE_F2: {
+						debug = (debug + 1) % 2;
+						break;
 					}
-					keyboardKeyPressedW = true;
-					playerLastDirection = 400;
-					break;
-				}
-				case SDL_SCANCODE_S: {
-					if (debug > 0) {
-						cout << "S pressed" << endl;
+					case SDL_SCANCODE_W: {
+						if (keyboardKeyPressedW) {
+							break;
+						}
+						if (debug > 0) {
+							cout << "W pressed" << endl;
+						}
+						keyboardKeyPressedW = true;
+						playerDirectionKeysPressed++;
+
+						switch (playerDirectionKeysPressed)
+						{
+						case 1: {
+							playerLastDirection = 0;
+							break;
+						}
+						case 2: {
+							if (keyboardState[SDL_SCANCODE_D]) {
+								playerLastDirection = 400;
+							}
+							if (keyboardState[SDL_SCANCODE_A]) {
+								playerLastDirection = 2800;
+							}
+							break;
+						}
+						default:
+							break;
+						}
+						break;	
 					}
-					keyboardKeyPressedS = true;
-					playerLastDirection = 0;
-					break;
-				}
-				case SDL_SCANCODE_A: {
-					if (debug > 0) {
-						cout << "A pressed" << endl;
+					case SDL_SCANCODE_S: {
+						if (keyboardKeyPressedS) {
+							break;
+						}
+						if (debug > 0) {
+							cout << "S pressed" << endl;
+						}
+						keyboardKeyPressedS = true;
+						playerDirectionKeysPressed++;
+
+						switch (playerDirectionKeysPressed)
+						{
+						case 1: {
+							playerLastDirection = 1600;
+							break;
+						}
+						case 2: {
+							if (keyboardState[SDL_SCANCODE_D]) {
+								playerLastDirection = 1200;
+							}
+							if (keyboardState[SDL_SCANCODE_A]) {
+								playerLastDirection = 2000;
+							}
+							break;
+						}
+						default:
+							break;
+						}
+						break;
 					}
-					keyboardKeyPressedA = true;
-					playerLastDirection = 800;
-					break;
-				}
-				case SDL_SCANCODE_D: {
-					if (debug > 0) {
-						cout << "D pressed" << endl;
+					case SDL_SCANCODE_A: {
+						if (keyboardKeyPressedA) {
+							break;
+						}
+						if (debug > 0) {
+							cout << "A pressed" << endl;
+						}
+						keyboardKeyPressedA = true;
+						playerDirectionKeysPressed++;
+
+						switch (playerDirectionKeysPressed)
+						{
+						case 1: {
+							playerLastDirection = 2400;
+							break;
+						}
+						case 2: {
+							if (keyboardState[SDL_SCANCODE_W]) {
+								playerLastDirection = 2800;
+							}
+							if (keyboardState[SDL_SCANCODE_S]) {
+								playerLastDirection = 2000;
+							}
+							break;
+						}
+						default:
+							break;
+						}
+						break;
 					}
-					keyboardKeyPressedD = true;
-					playerLastDirection = 1200;
-					break;
+					case SDL_SCANCODE_D: {
+						if (keyboardKeyPressedD) {
+							break;
+						}
+						if (debug > 0) {
+							cout << "D pressed" << endl;
+						}
+						keyboardKeyPressedD = true;
+						playerDirectionKeysPressed++;
+
+						switch (playerDirectionKeysPressed) 
+						{
+						case 1: {
+							playerLastDirection = 800;
+							break;
+						}
+						case 2: {
+							if (keyboardState[SDL_SCANCODE_W]) {
+								playerLastDirection = 400;
+							}
+							if (keyboardState[SDL_SCANCODE_S]) {
+								playerLastDirection = 1200;
+							}
+							break;
+						}
+						default:
+							break;
+						}
+						break;
+					}
+					default:
+						break;
 				}
-				default:
-					break;
-				}
+				break;
 			}
 			case SDL_KEYUP: {
 				switch (event.key.keysym.scancode) {
@@ -185,6 +275,41 @@ int main(int argc, char* argv[]) {
 						cout << "W released" << endl;
 					}
 					keyboardKeyPressedW = false;
+					playerDirectionKeysPressed--;
+
+					switch (playerDirectionKeysPressed)
+					{
+					case 3: {
+						playerLastDirection = 1600;
+						break;
+					}
+					case 2: {
+						if (keyboardState[SDL_SCANCODE_A] && keyboardState[SDL_SCANCODE_S]) {
+							playerLastDirection = 2000;
+						}
+						if (keyboardState[SDL_SCANCODE_S] && keyboardState[SDL_SCANCODE_D]) {
+							playerLastDirection = 1200;
+						}
+						if (keyboardState[SDL_SCANCODE_A] && keyboardState[SDL_SCANCODE_D]) {
+							break;
+						}
+						break;
+					}
+					case 1: {
+						if (keyboardState[SDL_SCANCODE_A]) {
+							playerLastDirection = 2400;
+						}
+						if (keyboardState[SDL_SCANCODE_S]) {
+							playerLastDirection = 1600;
+						}
+						if (keyboardState[SDL_SCANCODE_D]) {
+							playerLastDirection = 800;
+						}
+						break;
+					}
+					default:
+						break;
+					}
 					break;
 				}
 				case SDL_SCANCODE_S: {
@@ -192,6 +317,42 @@ int main(int argc, char* argv[]) {
 						cout << "S released" << endl;
 					}
 					keyboardKeyPressedS = false;
+					playerDirectionKeysPressed--;
+					cout << playerDirectionKeysPressed;
+
+					switch (playerDirectionKeysPressed)
+					{
+					case 3: {
+						playerLastDirection = 0;
+						break;
+					}
+					case 2: {
+						if (keyboardState[SDL_SCANCODE_A] && keyboardState[SDL_SCANCODE_W]) {
+							playerLastDirection = 2800;
+						}
+						if (keyboardState[SDL_SCANCODE_W] && keyboardState[SDL_SCANCODE_D]) {
+							playerLastDirection = 400;
+						}
+						if (keyboardState[SDL_SCANCODE_A] && keyboardState[SDL_SCANCODE_D]) {
+							break;
+						}
+						break;
+					}
+					case 1: {
+						if (keyboardState[SDL_SCANCODE_A]) {
+							playerLastDirection = 2400;
+						}
+						if (keyboardState[SDL_SCANCODE_W]) {
+							playerLastDirection = 0;
+						}
+						if (keyboardState[SDL_SCANCODE_D]) {
+							playerLastDirection = 800;
+						}
+						break;
+					}
+					default:
+						break;
+					}
 					break;
 				}
 				case SDL_SCANCODE_A: {
@@ -199,6 +360,41 @@ int main(int argc, char* argv[]) {
 						cout << "A released" << endl;
 					}
 					keyboardKeyPressedA = false;
+					playerDirectionKeysPressed--;
+
+					switch (playerDirectionKeysPressed)
+					{
+					case 3: {
+						playerLastDirection = 800;
+						break;
+					}
+					case 2: {
+						if (keyboardState[SDL_SCANCODE_W] && keyboardState[SDL_SCANCODE_S]) {
+							break;
+						}
+						if (keyboardState[SDL_SCANCODE_S] && keyboardState[SDL_SCANCODE_D]) {
+							playerLastDirection = 1200;
+						}
+						if (keyboardState[SDL_SCANCODE_W] && keyboardState[SDL_SCANCODE_D]) {
+							playerLastDirection = 400;
+						}
+						break;
+					}
+					case 1: {
+						if (keyboardState[SDL_SCANCODE_W]) {
+							playerLastDirection = 0;
+						}
+						if (keyboardState[SDL_SCANCODE_S]) {
+							playerLastDirection = 1600;
+						}
+						if (keyboardState[SDL_SCANCODE_D]) {
+							playerLastDirection = 800;
+						}
+						break;
+					}
+					default:
+						break;
+					}
 					break;
 				}
 				case SDL_SCANCODE_D: {
@@ -206,6 +402,41 @@ int main(int argc, char* argv[]) {
 						cout << "D released" << endl;
 					}
 					keyboardKeyPressedD = false;
+					playerDirectionKeysPressed--;
+
+					switch (playerDirectionKeysPressed)
+					{
+					case 3: {
+						playerLastDirection = 2400;
+						break;
+					}
+					case 2: {
+						if (keyboardState[SDL_SCANCODE_W] && keyboardState[SDL_SCANCODE_S]) {
+							break;
+						}
+						if (keyboardState[SDL_SCANCODE_S] && keyboardState[SDL_SCANCODE_A]) {
+							playerLastDirection = 2000;
+						}
+						if (keyboardState[SDL_SCANCODE_W] && keyboardState[SDL_SCANCODE_A]) {
+							playerLastDirection = 2800;
+						}
+						break;
+					}
+					case 1: {
+						if (keyboardState[SDL_SCANCODE_W]) {
+							playerLastDirection = 0;
+						}
+						if (keyboardState[SDL_SCANCODE_S]) {
+							playerLastDirection = 1600;
+						}
+						if (keyboardState[SDL_SCANCODE_A]) {
+							playerLastDirection = 2400;
+						}
+						break;
+					}
+					default:
+						break;
+					}
 					break;
 				}
 				default:
@@ -235,15 +466,13 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor(renderer, 225, 255, 255, 255);
 		SDL_RenderClear(renderer);
 
-
-
 		//Отрисовываем персонажа
 		SDL_RenderCopy(renderer, playerWalkingTexture, &playerWalkingSrc, &playerWalkingDest);
 
 		//Отрисовываем текст
 		SDL_RenderCopy(renderer, fontTex, NULL, &fontRect);
 
-
+		//Переключаем кадр
 		SDL_RenderPresent(renderer);
 
 
@@ -264,3 +493,5 @@ int main(int argc, char* argv[]) {
 // TODO сделать защиту от отрицательного SDL_Delay
 // TODO разделить логику и отрисовку кадров на 2 независимых потока чтобы игра не зависела от количества fps
 // TODO сделать чтобы последняя нажатая клавиша была направлением ходьбы
+// TODO перейти на SDL3
+// TODO сделать переназначение клавиш клавиатуры
